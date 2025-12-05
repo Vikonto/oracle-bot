@@ -3,389 +3,506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Oracle</title>
+    <title>✨ Mystical Oracle ✨</title>
     <style>
-        /* == ОБЩИЙ СТИЛЬ И ТЕМА == */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
-            color: #e0e0e0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #fff;
+            min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-            overflow: hidden;
+            overflow-x: hidden;
             position: relative;
-            -webkit-tap-highlight-color: transparent; /* Убирает синий квадрат при тапе на мобильных */
+            padding: 20px;
         }
 
-        /* Поддержка RTL (Иврит, Арабский) */
-        body.rtl { direction: rtl; font-family: 'Tahoma', sans-serif; }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-        /* ЗВЕЗДЫ НА ФОНЕ */
-        .star {
+        body.rtl { direction: rtl; }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
             position: absolute;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.8;
-            animation: twinkle infinite ease-in-out;
-            z-index: -1;
-        }
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.2; transform: scale(0.5); box-shadow: 0 0 0 white; }
-            50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 10px white; }
+            pointer-events: none;
+            opacity: 0;
+            animation: float 8s infinite ease-in-out;
         }
 
-        /* КОНТЕЙНЕРЫ ЭКРАНОВ */
-        .screen { display: none; width: 100%; max-width: 400px; flex-direction: column; align-items: center; z-index: 10; }
-        .active { display: flex; animation: fadeIn 0.8s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
 
-        /* ПАНЕЛЬ ЯЗЫКОВ */
-        .lang-panel { display: flex; gap: 10px; margin-bottom: 30px; z-index: 20; }
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 420px;
+            z-index: 10;
+        }
+
+        .screen.active { 
+            display: block; 
+            animation: slideIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(50px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            letter-spacing: 2px;
+        }
+
+        p {
+            text-align: center;
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            font-weight: 300;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .lang-panel {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
         .lang-btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid #6c5ce7;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 50px;
             cursor: pointer;
             font-size: 14px;
-            transition: 0.3s;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .lang-btn.selected { background: #6c5ce7; box-shadow: 0 0 10px #6c5ce7; border-color: #a29bfe; }
 
-        /* ТИПОГРАФИКА */
-        h1 { color: #d1ccc0; text-shadow: 0 0 15px #6c5ce7; margin-bottom: 20px; font-size: 24px; line-height: 1.2; }
-        p { line-height: 1.6; font-size: 16px; color: #b2bec3; margin-bottom: 10px; }
+        .lang-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
 
-        /* КНОПКИ ТЕМ (ГРИД) */
+        .lang-btn.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #fff;
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.8);
+            transform: scale(1.1);
+        }
+
+        .emoji-big {
+            font-size: 100px;
+            text-align: center;
+            margin: 20px 0;
+            animation: bounce 2s infinite;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+            display: block;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.1); }
+        }
+
         .grid-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            width: 100%;
+            margin-top: 25px;
         }
+
         .topic-btn {
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(108, 92, 231, 0.5);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             color: #fff;
-            padding: 15px;
-            border-radius: 16px;
-            font-size: 16px;
+            padding: 20px 10px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            backdrop-filter: blur(5px);
-            transition: all 0.2s;
+            transition: all 0.3s;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100px;
+            min-height: 110px;
         }
-        .topic-btn span { font-size: 32px; display: block; margin-bottom: 8px; }
-        .topic-btn:hover { background: rgba(108, 92, 231, 0.4); transform: translateY(-3px); border-color: #fff; }
-        .topic-btn:active { transform: scale(0.95); }
 
-        /* ГЛАВНАЯ КНОПКА (CTA) */
+        .topic-btn:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            border-color: #fff;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+        }
+
+        .topic-btn span {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
         .main-btn {
-            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             border: none;
             padding: 18px 40px;
-            color: white;
+            color: #fff;
             font-size: 18px;
+            font-weight: 700;
             border-radius: 50px;
-            font-weight: bold;
-            box-shadow: 0 0 20px rgba(108, 92, 231, 0.6);
             cursor: pointer;
             margin-top: 25px;
-            width: 85%;
-            animation: pulse-btn 2s infinite;
-        }
-        @keyframes pulse-btn { 
-            0% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.7); } 
-            70% { box-shadow: 0 0 0 15px rgba(108, 92, 231, 0); } 
-            100% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0); } 
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
-        /* БЛОК С РЕЗУЛЬТАТОМ */
-        #result-text {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid #a29bfe;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: left;
-            font-size: 16px;
-            line-height: 1.6;
-            width: 100%;
-            box-sizing: border-box;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-            margin-bottom: 20px;
-            min-height: 120px;
-            overflow-y: auto;
-            max-height: 50vh;
+        .main-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(245, 87, 108, 0.7);
         }
-        
-        /* Стилизация ответа от AI */
-        #result-text b { color: #ff7675; font-weight: bold; }
+
+        #result-text {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 25px;
+            border-radius: 20px;
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            min-height: 150px;
+            max-height: 50vh;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        #result-text b {
+            color: #ffd700;
+            font-weight: 700;
+        }
+
         body.rtl #result-text { text-align: right; }
 
-        /* ЗАГРУЗКА */
-        .loader { font-size: 50px; animation: spin 1.5s linear infinite; display: none; margin: 30px auto; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* Кнопка "Назад" */
-        .back-link { margin-top: 20px; color: #a29bfe; cursor: pointer; text-decoration: underline; opacity: 0.8; }
-        
-        /* Кнопка Share */
-        .share-btn {
-            background: linear-gradient(135deg, #00b894, #55efc4);
-            border: none;
-            padding: 15px;
-            color: #000;
-            border-radius: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 10px;
-            box-shadow: 0 0 15px rgba(0, 184, 148, 0.4);
+        .loader {
+            font-size: 60px;
+            text-align: center;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 30px auto;
         }
 
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            opacity: 0.8;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            opacity: 1;
+        }
+
+        .share-btn {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            border: none;
+            padding: 15px;
+            color: #fff;
+            border-radius: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(17, 153, 142, 0.4);
+            text-transform: uppercase;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(17, 153, 142, 0.6);
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 24px; }
+            .emoji-big { font-size: 80px; }
+            .topic-btn { padding: 15px 8px; min-height: 100px; }
+        }
     </style>
 </head>
 <body>
 
-    <div id="stars-container"></div>
+    <div class="particles" id="particles"></div>
 
     <div id="screen-welcome" class="screen active">
-        <div class="lang-panel">
-            <button class="lang-btn" onclick="setLanguage('ru')">RU</button>
-            <button class="lang-btn selected" onclick="setLanguage('en')">EN</button>
-            <button class="lang-btn" onclick="setLanguage('he')">HE</button>
-            <button class="lang-btn" onclick="setLanguage('ar')">AR</button>
+        <div class="glass-card">
+            <div class="lang-panel">
+                <button class="lang-btn" onclick="setLanguage('ru')">🇷🇺 RU</button>
+                <button class="lang-btn selected" onclick="setLanguage('en')">🇬🇧 EN</button>
+                <button class="lang-btn" onclick="setLanguage('he')">🇮🇱 HE</button>
+                <button class="lang-btn" onclick="setLanguage('ar')">🇸🇦 AR</button>
+            </div>
+            <h1 id="txt-welcome-title">✨ HELLO, TRAVELER ✨</h1>
+            <span class="emoji-big">🔮</span>
+            <p id="txt-welcome-desc">I am the Ancient Oracle.<br>I know the answers you seek.<br>Are you ready to face the truth?</p>
+            <button class="main-btn" onclick="showScreen('screen-select')" id="txt-btn-start">ENTER PORTAL</button>
         </div>
-
-        <h1 id="txt-welcome-title">🌌 ПРИВЕТ, СТРАННИК</h1>
-        <div style="font-size: 80px; margin: 20px;">🧙‍♂️</div>
-        <p id="txt-welcome-desc">
-            Я — Древний Оракул.<br>Я знаю ответы на твои вопросы.<br>Готов ли ты узнать правду?
-        </p>
-
-        <button class="main-btn" onclick="showScreen('screen-select')" id="txt-btn-start">ВОЙТИ В ПОРТАЛ</button>
     </div>
 
     <div id="screen-select" class="screen">
-        <h1 id="txt-select-title">🔮 ВЫБЕРИ ТЕМУ</h1>
-        <div class="grid-container">
-            <button class="topic-btn" onclick="selectTopic('love')">
-                <span>❤️</span> <div id="btn-love">Любовь</div>
-            </button>
-            <button class="topic-btn" onclick="selectTopic('money')">
-                <span>💎</span> <div id="btn-money">Деньги</div>
-            </button>
-            <button class="topic-btn" onclick="selectTopic('yesno')">
-                <span>⚖️</span> <div id="btn-yesno">Да / Нет</div>
-            </button>
-            <button class="topic-btn" onclick="selectTopic('today')">
-                <span>🃏</span> <div id="btn-today">Карта Дня</div>
-            </button>
-            <button class="topic-btn" onclick="selectTopic('advice')">
-                <span>✨</span> <div id="btn-advice">Совет</div>
-            </button>
-            <button class="topic-btn" onclick="selectTopic('secret')">
-                <span>👁️</span> <div id="btn-secret">Тайное</div>
-            </button>
+        <div class="glass-card">
+            <h1 id="txt-select-title">🌟 CHOOSE A PATH 🌟</h1>
+            <div class="grid-container">
+                <button class="topic-btn" onclick="selectTopic('love')">
+                    <span>❤️</span><div id="btn-love">Love</div>
+                </button>
+                <button class="topic-btn" onclick="selectTopic('money')">
+                    <span>💎</span><div id="btn-money">Money</div>
+                </button>
+                <button class="topic-btn" onclick="selectTopic('yesno')">
+                    <span>⚖️</span><div id="btn-yesno">Yes / No</div>
+                </button>
+                <button class="topic-btn" onclick="selectTopic('today')">
+                    <span>🃏</span><div id="btn-today">Card of Day</div>
+                </button>
+                <button class="topic-btn" onclick="selectTopic('advice')">
+                    <span>✨</span><div id="btn-advice">Advice</div>
+                </button>
+                <button class="topic-btn" onclick="selectTopic('secret')">
+                    <span>👁️</span><div id="btn-secret">Secret</div>
+                </button>
+            </div>
+            <div class="back-link" onclick="showScreen('screen-welcome')">← Change Language</div>
         </div>
-        <div class="back-link" onclick="showScreen('screen-welcome')">🌐 Change Language</div>
     </div>
 
     <div id="screen-focus" class="screen">
-        <h1 id="txt-focus-title">✨ СВЯЗЬ...</h1>
-        <div style="font-size: 80px; margin: 20px; animation: pulse-btn 3s infinite;">🔮</div>
-        <p id="focus-msg">Духи слушают...</p>
-        <p id="txt-focus-hint" style="font-size: 14px; opacity: 0.7;">(Задай вопрос мысленно)</p>
-        
-        <button class="main-btn" onclick="askOracle()" id="txt-btn-ask">ПОЛУЧИТЬ ОТВЕТ</button>
-        <div class="back-link" onclick="goBack()" id="txt-back">← Назад</div>
+        <div class="glass-card">
+            <h1 id="txt-focus-title">💫 CONNECTING... 💫</h1>
+            <span class="emoji-big" style="animation: bounce 1.5s infinite;">🌀</span>
+            <p id="focus-msg" style="font-size: 18px; font-weight: 600;">Spirits are listening...</p>
+            <p id="txt-focus-hint" style="font-size: 14px; opacity: 0.7;">(Think of your question now)</p>
+            <button class="main-btn" onclick="askOracle()" id="txt-btn-ask">REVEAL FATE</button>
+            <div class="back-link" onclick="goBack()" id="txt-back">← Back</div>
+        </div>
     </div>
 
     <div id="screen-result" class="screen">
-        <h1 id="txt-result-title">🌌 ПРОРОЧЕСТВО</h1>
-        <div id="loader" class="loader">🌀</div>
-        <div id="result-text"></div>
-        
-        <button class="share-btn" onclick="shareApp()" id="txt-share">🚀 Поделиться</button>
-        
-        <button class="topic-btn" style="width: 100%; padding: 10px; min-height: auto;" onclick="goBack()" id="txt-btn-again">🔄 Спросить снова</button>
+        <div class="glass-card">
+            <h1 id="txt-result-title">🌌 PROPHECY 🌌</h1>
+            <div id="loader" class="loader">🔮</div>
+            <div id="result-text"></div>
+            <button class="share-btn" onclick="shareApp()" id="txt-share">🚀 SHARE WITH FRIENDS</button>
+            <button class="main-btn" onclick="goBack()" id="txt-btn-again">ASK ANOTHER</button>
+        </div>
     </div>
 
     <script>
-        // === ПЕРЕМЕННЫЕ СОСТОЯНИЯ ===
-        let currentLang = 'ru';
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const emojis = ['✨', '💫', '⭐', '🌟', '💎', '🔮'];
+            setInterval(() => {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                p.style.left = Math.random() * 100 + '%';
+                p.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                p.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                container.appendChild(p);
+                setTimeout(() => p.remove(), 10000);
+            }, 500);
+        }
+        createParticles();
+
+        let currentLang = 'en';
         let currentTopicKey = '';
 
-        // === СЛОВАРЬ (ТЕКСТЫ) ===
         const dictionary = {
             ru: {
-                welcomeTitle: "🌌 ПРИВЕТ, СТРАННИК",
+                welcomeTitle: "✨ ПРИВЕТ, СТРАННИК ✨",
                 welcomeDesc: "Я — Древний Оракул.<br>Я знаю ответы на твои вопросы.<br>Готов ли ты узнать правду?",
                 btnStart: "ВОЙТИ В ПОРТАЛ",
-                selectTitle: "🔮 ВЫБЕРИ ТЕМУ",
-                focusTitle: "✨ СВЯЗЬ...",
+                selectTitle: "🌟 ВЫБЕРИ ТЕМУ 🌟",
+                focusTitle: "💫 СВЯЗЬ... 💫",
                 focusHint: "(Задай вопрос мысленно)",
                 btnAsk: "ПОЛУЧИТЬ ОТВЕТ",
-                resultTitle: "🌌 ПРОРОЧЕСТВО",
-                btnAgain: "🔄 Спросить снова",
+                resultTitle: "🌌 ПРОРОЧЕСТВО 🌌",
+                btnAgain: "СПРОСИТЬ СНОВА",
                 back: "← Назад",
-                share: "🚀 Поделиться пророчеством",
-                shareText: "🔮 Оракул дал мне предсказание! Узнай свое будущее тут: ",
-                topics: {
-                    love: "Любовь", money: "Деньги", yesno: "Да / Нет", today: "Карта Дня", advice: "Совет", secret: "Тайное"
-                },
-                focusMsg: "Тема запроса: "
+                share: "🚀 ПОДЕЛИТЬСЯ С ДРУЗЬЯМИ",
+                shareText: "🔮 Оракул открыл мне будущее! Узнай свое: ",
+                topics: { love: "Любовь", money: "Деньги", yesno: "Да / Нет", today: "Карта Дня", advice: "Совет", secret: "Тайное" },
+                focusMsg: "Тема: "
             },
             en: {
-                welcomeTitle: "🌌 HELLO, TRAVELER",
+                welcomeTitle: "✨ HELLO, TRAVELER ✨",
                 welcomeDesc: "I am the Ancient Oracle.<br>I know the answers you seek.<br>Are you ready to face the truth?",
                 btnStart: "ENTER PORTAL",
-                selectTitle: "🔮 CHOOSE A PATH",
-                focusTitle: "✨ CONNECTING...",
+                selectTitle: "🌟 CHOOSE A PATH 🌟",
+                focusTitle: "💫 CONNECTING... 💫",
                 focusHint: "(Think of your question now)",
                 btnAsk: "REVEAL FATE",
-                resultTitle: "🌌 PROPHECY",
-                btnAgain: "🔄 Ask Another",
+                resultTitle: "🌌 PROPHECY 🌌",
+                btnAgain: "ASK ANOTHER",
                 back: "← Back",
-                share: "🚀 Share Prophecy",
-                shareText: "🔮 The Oracle revealed my fate! Check yours here: ",
-                topics: {
-                    love: "Love", money: "Money", yesno: "Yes / No", today: "Card of Day", advice: "Advice", secret: "Secret"
-                },
+                share: "🚀 SHARE WITH FRIENDS",
+                shareText: "🔮 The Oracle revealed my fate! Check yours: ",
+                topics: { love: "Love", money: "Money", yesno: "Yes / No", today: "Card of Day", advice: "Advice", secret: "Secret" },
                 focusMsg: "Topic: "
             },
             he: {
-                welcomeTitle: "🌌 שלום לנודד",
-                welcomeDesc: "אני האורקל העתיק.<br>אני יודע את התשובות לשאלותיך.<br>האם אתה מוכן לגלות את האמת?",
+                welcomeTitle: "✨ שלום לנודד ✨",
+                welcomeDesc: "אני האורקל העתיק.<br>אני יודע את התשובות.<br>מוכן לגלות את האמת?",
                 btnStart: "הכנס לפורטל",
-                selectTitle: "🔮 בחר נושא",
-                focusTitle: "✨ מתחבר...",
-                focusHint: "(חשוב על השאלה כעת)",
-                btnAsk: "גלה את העתיד",
-                resultTitle: "🌌 נבואה",
-                btnAgain: "🔄 שאל שוב",
+                selectTitle: "🌟 בחר דרך 🌟",
+                focusTitle: "💫 מתחבר... 💫",
+                focusHint: "(חשוב על השאלה)",
+                btnAsk: "גלה גורל",
+                resultTitle: "🌌 נבואה 🌌",
+                btnAgain: "שאל שוב",
                 back: "→ חזור",
-                share: "🚀 שתף את הנבואה",
-                shareText: "🔮 האורקל גילה לי את עתידי! בדוק את שלך כאן: ",
-                topics: {
-                    love: "אהבה", money: "כסף", yesno: "כן / לא", today: "קלף יומי", advice: "עצה", secret: "סוד"
-                },
-                focusMsg: "נושא השאלה: "
+                share: "🚀 שתף עם חברים",
+                shareText: "🔮 האורקל גילה את עתידי! בדוק שלך: ",
+                topics: { love: "אהבה", money: "כסף", yesno: "כן / לא", today: "קלף יומי", advice: "עצה", secret: "סוד" },
+                focusMsg: "נושא: "
             },
             ar: {
-                welcomeTitle: "🌌 أهلاً أيها المسافر",
-                welcomeDesc: "أنا العراف القديم.<br>أعرف الإجابات التي تبحث عنها.<br>هل أنت مستعد لمعرفة الحقيقة؟",
+                welcomeTitle: "✨ أهلاً أيها المسافر ✨",
+                welcomeDesc: "أنا العراف القديم.<br>أعرف الإجابات.<br>مستعد لمعرفة الحقيقة؟",
                 btnStart: "ادخل البوابة",
-                selectTitle: "🔮 اختر مسارك",
-                focusTitle: "✨ جاري الاتصال...",
-                focusHint: "(فكر في سؤالك الآن)",
+                selectTitle: "🌟 اختر طريقك 🌟",
+                focusTitle: "💫 جاري الاتصال... 💫",
+                focusHint: "(فكر في سؤالك)",
                 btnAsk: "اكشف المصير",
-                resultTitle: "🌌 النبوءة",
-                btnAgain: "🔄 اسأل مرة أخرى",
+                resultTitle: "🌌 النبوءة 🌌",
+                btnAgain: "اسأل مرة أخرى",
                 back: "→ رجوع",
-                share: "🚀 شارك النبوءة",
-                shareText: "🔮 كشف العراف عن قدري! تحقق من قدرك هنا: ",
-                topics: {
-                    love: "حب", money: "مال", yesno: "نعم / لا", today: "بطاقة اليوم", advice: "نصيحة", secret: "سر"
-                },
-                focusMsg: "موضوع السؤال: "
+                share: "🚀 شارك مع الأصدقاء",
+                shareText: "🔮 كشف العراف مصيري! تحقق من مصيرك: ",
+                topics: { love: "حب", money: "مال", yesno: "نعم / لا", today: "بطاقة اليوم", advice: "نصيحة", secret: "سر" },
+                focusMsg: "الموضوع: "
             }
         };
 
-        // === МАГИЯ ЗВЕЗД ===
-        function createStars() {
-            const container = document.getElementById('stars-container');
-            for (let i = 0; i < 40; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                const x = Math.random() * 100;
-                const y = Math.random() * 100;
-                const size = Math.random() * 3 + 1;
-                const duration = Math.random() * 3 + 2;
-                star.style.left = x + '%';
-                star.style.top = y + '%';
-                star.style.width = size + 'px';
-                star.style.height = size + 'px';
-                star.style.animationDuration = duration + 's';
-                container.appendChild(star);
-            }
-        }
-        createStars();
-
-        // === УПРАВЛЕНИЕ ИНТЕРФЕЙСОМ ===
-        window.setLanguage = function(lang) {
+        function setLanguage(lang) {
             currentLang = lang;
-            
-            // UI кнопки
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('selected'));
             event.target.classList.add('selected');
-
-            // RTL
+            
             if (lang === 'he' || lang === 'ar') document.body.classList.add('rtl');
             else document.body.classList.remove('rtl');
 
-            // Обновляем тексты
             const t = dictionary[lang];
-            document.getElementById('txt-welcome-title').innerText = t.welcomeTitle;
+            document.getElementById('txt-welcome-title').innerHTML = t.welcomeTitle;
             document.getElementById('txt-welcome-desc').innerHTML = t.welcomeDesc;
             document.getElementById('txt-btn-start').innerText = t.btnStart;
-            document.getElementById('txt-select-title').innerText = t.selectTitle;
-            document.getElementById('txt-focus-title').innerText = t.focusTitle;
+            document.getElementById('txt-select-title').innerHTML = t.selectTitle;
+            document.getElementById('txt-focus-title').innerHTML = t.focusTitle;
             document.getElementById('txt-focus-hint').innerText = t.focusHint;
             document.getElementById('txt-btn-ask').innerText = t.btnAsk;
-            document.getElementById('txt-result-title').innerText = t.resultTitle;
+            document.getElementById('txt-result-title').innerHTML = t.resultTitle;
             document.getElementById('txt-btn-again').innerText = t.btnAgain;
             document.getElementById('txt-back').innerText = t.back;
             document.getElementById('txt-share').innerText = t.share;
 
-            document.getElementById('btn-love').innerText = t.topics.love;
-            document.getElementById('btn-money').innerText = t.topics.money;
-            document.getElementById('btn-yesno').innerText = t.topics.yesno;
-            document.getElementById('btn-today').innerText = t.topics.today;
-            document.getElementById('btn-advice').innerText = t.topics.advice;
-            document.getElementById('btn-secret').innerText = t.topics.secret;
+            Object.keys(t.topics).forEach(key => {
+                document.getElementById('btn-' + key).innerText = t.topics[key];
+            });
         }
 
-        window.showScreen = function(id) {
+        function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
 
-        window.selectTopic = function(key) {
+        function selectTopic(key) {
             currentTopicKey = key;
             const t = dictionary[currentLang];
             document.getElementById('focus-msg').innerText = t.focusMsg + t.topics[key];
             showScreen('screen-focus');
         }
 
-        window.goBack = function() {
+        function goBack() {
             showScreen('screen-select');
             document.getElementById('result-text').innerHTML = "";
             document.getElementById('loader').style.display = "none";
         }
 
-        window.shareApp = function() {
+        function shareApp() {
             const t = dictionary[currentLang];
-            // Вставь сюда ссылку на своего бота
-            const botUrl = "https://t.me/YOUR_BOT_NAME"; 
-            const text = t.shareText;
-            const tgLink = `https://t.me/share/url?url=${encodeURIComponent(botUrl)}&text=${encodeURIComponent(text)}`;
-            window.open(tgLink, '_blank');
+            const url = "https://oracle-bot-five.vercel.app";
+            
+            if (navigator.share) {
+                navigator.share({ title: 'Mystical Oracle', text: t.shareText, url: url })
+                    .catch(() => {
+                        const tg = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(t.shareText)}`;
+                        window.open(tg, '_blank');
+                    });
+            } else {
+                const tg = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(t.shareText)}`;
+                window.open(tg, '_blank');
+            }
         }
 
-        // === ОБРАЩЕНИЕ К СЕРВЕРУ (BACKEND) ===
-        window.askOracle = async function() {
+        async function askOracle() {
             showScreen('screen-result');
             const resultBox = document.getElementById('result-text');
             const loader = document.getElementById('loader');
@@ -393,30 +510,12 @@
             resultBox.innerHTML = "";
             loader.style.display = "block";
 
-            // Определяем параметры для AI
-            let langName = "Russian";
-            if(currentLang === 'en') langName = "English";
-            if(currentLang === 'he') langName = "Hebrew";
-            if(currentLang === 'ar') langName = "Arabic";
-
+            const langMap = { ru: "Russian", en: "English", he: "Hebrew", ar: "Arabic" };
             const t = dictionary[currentLang];
-            const topicName = t.topics[currentTopicKey];
             
-            // Формируем промпт для отправки на сервер
-            const promptData = `
-                You are a mystical Oracle. 
-                User Language: ${langName}.
-                Topic: ${topicName}.
-                Task: Give a short, mystical prediction/advice. 
-                Format using HTML tags: use <br> for new lines, <b> for emphasis.
-                Use emojis at the start of sentences.
-                Structure: 1. Mystical intro. 2. Direct answer. 3. Short advice.
-                If topic is "Yes / No", start with bold YES or NO in ${langName}.
-                Output must be fully in ${langName}.
-            `;
+            const promptData = `You are a mystical Oracle. User Language: ${langMap[currentLang]}. Topic: ${t.topics[currentTopicKey]}. Give a short mystical prediction. Format: HTML with <br> for lines, <b> for emphasis. Use 2-3 emojis. Keep it 2-3 sentences max. ${currentTopicKey === 'yesno' ? 'Start with bold YES or NO.' : ''} Output in ${langMap[currentLang]}.`;
 
             try {
-                // ОТПРАВЛЯЕМ ЗАПРОС НА НАШ СЕРВЕР (api/oracle.js)
                 const response = await fetch('/api/oracle', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -424,23 +523,16 @@
                 });
 
                 const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Error');
 
-                if (!response.ok) {
-                    throw new Error(data.error || 'Server error');
-                }
-
-                // Очистка от маркдауна (если вдруг придет)
                 let cleanText = data.text.replace(/```html/g, "").replace(/```/g, "");
-
                 loader.style.display = "none";
                 resultBox.innerHTML = cleanText;
 
             } catch (error) {
                 loader.style.display = "none";
                 console.error(error);
-                resultBox.innerText = (currentLang === 'ru') 
-                    ? "Связь с космосом прервана... Попробуйте позже." 
-                    : "Connection lost... Try again later.";
+                resultBox.innerHTML = '<b>⚠️ Connection lost...</b><br>Try again later';
             }
         }
     </script>
