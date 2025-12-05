@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Oracle</title>
+    <style>
+        /* == ОБЩИЙ СТИЛЬ И ТЕМА == */
+        body {
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+            -webkit-tap-highlight-color: transparent; /* Убирает синий квадрат при тапе на мобильных */
+        }
+
+        /* Поддержка RTL (Иврит, Арабский) */
+        body.rtl { direction: rtl; font-family: 'Tahoma', sans-serif; }
+
+        /* ЗВЕЗДЫ НА ФОНЕ */
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: twinkle infinite ease-in-out;
+            z-index: -1;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.5); box-shadow: 0 0 0 white; }
+            50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 10px white; }
+        }
+
+        /* КОНТЕЙНЕРЫ ЭКРАНОВ */
+        .screen { display: none; width: 100%; max-width: 400px; flex-direction: column; align-items: center; z-index: 10; }
+        .active { display: flex; animation: fadeIn 0.8s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ПАНЕЛЬ ЯЗЫКОВ */
+        .lang-panel { display: flex; gap: 10px; margin-bottom: 30px; z-index: 20; }
+        .lang-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #6c5ce7;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .lang-btn.selected { background: #6c5ce7; box-shadow: 0 0 10px #6c5ce7; border-color: #a29bfe; }
+
+        /* ТИПОГРАФИКА */
+        h1 { color: #d1ccc0; text-shadow: 0 0 15px #6c5ce7; margin-bottom: 20px; font-size: 24px; line-height: 1.2; }
+        p { line-height: 1.6; font-size: 16px; color: #b2bec3; margin-bottom: 10px; }
+
+        /* КНОПКИ ТЕМ (ГРИД) */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+        .topic-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(108, 92, 231, 0.5);
+            color: #fff;
+            padding: 15px;
+            border-radius: 16px;
+            font-size: 16px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100px;
+        }
+        .topic-btn span { font-size: 32px; display: block; margin-bottom: 8px; }
+        .topic-btn:hover { background: rgba(108, 92, 231, 0.4); transform: translateY(-3px); border-color: #fff; }
+        .topic-btn:active { transform: scale(0.95); }
+
+        /* ГЛАВНАЯ КНОПКА (CTA) */
+        .main-btn {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            border: none;
+            padding: 18px 40px;
+            color: white;
+            font-size: 18px;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(108, 92, 231, 0.6);
+            cursor: pointer;
+            margin-top: 25px;
+            width: 85%;
+            animation: pulse-btn 2s infinite;
+        }
+        @keyframes pulse-btn { 
+            0% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.7); } 
+            70% { box-shadow: 0 0 0 15px rgba(108, 92, 231, 0); } 
+            100% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0); } 
+        }
+
+        /* БЛОК С РЕЗУЛЬТАТОМ */
+        #result-text {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #a29bfe;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: left;
+            font-size: 16px;
+            line-height: 1.6;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            margin-bottom: 20px;
+            min-height: 120px;
+            overflow-y: auto;
+            max-height: 50vh;
+        }
+        
+        /* Стилизация ответа от AI */
+        #result-text b { color: #ff7675; font-weight: bold; }
+        body.rtl #result-text { text-align: right; }
+
+        /* ЗАГРУЗКА */
+        .loader { font-size: 50px; animation: spin 1.5s linear infinite; display: none; margin: 30px auto; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Кнопка "Назад" */
+        .back-link { margin-top: 20px; color: #a29bfe; cursor: pointer; text-decoration: underline; opacity: 0.8; }
+        
+        /* Кнопка Share */
+        .share-btn {
+            background: linear-gradient(135deg, #00b894, #55efc4);
+            border: none;
+            padding: 15px;
+            color: #000;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            box-shadow: 0 0 15px rgba(0, 184, 148, 0.4);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="stars-container"></div>
+
+    <div id="screen-welcome" class="screen active">
+        <div class="lang-panel">
+            <button class="lang-btn selected" onclick="setLanguage('ru')">RU</button>
+            <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+            <button class="lang-btn" onclick="setLanguage('he')">HE</button>
+            <button class="lang-btn" onclick="setLanguage('ar')">AR</button>
+        </div>
+
+        <h1 id="txt-welcome-title">🌌 ПРИВЕТ, СТРАННИК</h1>
+        <div style="font-size: 80px; margin: 20px;">🧙‍♂️</div>
+        <p id="txt-welcome-desc">
+            Я — Древний Оракул.<br>Я знаю ответы на твои вопросы.<br>Готов ли ты узнать правду?
+        </p>
+
+        <button class="main-btn" onclick="showScreen('screen-select')" id="txt-btn-start">ВОЙТИ В ПОРТАЛ</button>
+    </div>
+
+    <div id="screen-select" class="screen">
+        <h1 id="txt-select-title">🔮 ВЫБЕРИ ТЕМУ</h1>
+        <div class="grid-container">
+            <button class="topic-btn" onclick="selectTopic('love')">
+                <span>❤️</span> <div id="btn-love">Любовь</div>
+            </button>
+            <button class="topic-btn" onclick="selectTopic('money')">
+                <span>💎</span> <div id="btn-money">Деньги</div>
+            </button>
+            <button class="topic-btn" onclick="selectTopic('yesno')">
+                <span>⚖️</span> <div id="btn-yesno">Да / Нет</div>
+            </button>
+            <button class="topic-btn" onclick="selectTopic('today')">
+                <span>🃏</span> <div id="btn-today">Карта Дня</div>
+            </button>
+            <button class="topic-btn" onclick="selectTopic('advice')">
+                <span>✨</span> <div id="btn-advice">Совет</div>
+            </button>
+            <button class="topic-btn" onclick="selectTopic('secret')">
+                <span>👁️</span> <div id="btn-secret">Тайное</div>
+            </button>
+        </div>
+        <div class="back-link" onclick="showScreen('screen-welcome')">🌐 Change Language</div>
+    </div>
+
+    <div id="screen-focus" class="screen">
+        <h1 id="txt-focus-title">✨ СВЯЗЬ...</h1>
+        <div style="font-size: 80px; margin: 20px; animation: pulse-btn 3s infinite;">🔮</div>
+        <p id="focus-msg">Духи слушают...</p>
+        <p id="txt-focus-hint" style="font-size: 14px; opacity: 0.7;">(Задай вопрос мысленно)</p>
+        
+        <button class="main-btn" onclick="askOracle()" id="txt-btn-ask">ПОЛУЧИТЬ ОТВЕТ</button>
+        <div class="back-link" onclick="goBack()" id="txt-back">← Назад</div>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <h1 id="txt-result-title">🌌 ПРОРОЧЕСТВО</h1>
+        <div id="loader" class="loader">🌀</div>
+        <div id="result-text"></div>
+        
+        <button class="share-btn" onclick="shareApp()" id="txt-share">🚀 Поделиться</button>
+        
+        <button class="topic-btn" style="width: 100%; padding: 10px; min-height: auto;" onclick="goBack()" id="txt-btn-again">🔄 Спросить снова</button>
+    </div>
+
+    <script>
+        // === ПЕРЕМЕННЫЕ СОСТОЯНИЯ ===
+        let currentLang = 'ru';
+        let currentTopicKey = '';
+
+        // === СЛОВАРЬ (ТЕКСТЫ) ===
+        const dictionary = {
+            ru: {
+                welcomeTitle: "🌌 ПРИВЕТ, СТРАННИК",
+                welcomeDesc: "Я — Древний Оракул.<br>Я знаю ответы на твои вопросы.<br>Готов ли ты узнать правду?",
+                btnStart: "ВОЙТИ В ПОРТАЛ",
+                selectTitle: "🔮 ВЫБЕРИ ТЕМУ",
+                focusTitle: "✨ СВЯЗЬ...",
+                focusHint: "(Задай вопрос мысленно)",
+                btnAsk: "ПОЛУЧИТЬ ОТВЕТ",
+                resultTitle: "🌌 ПРОРОЧЕСТВО",
+                btnAgain: "🔄 Спросить снова",
+                back: "← Назад",
+                share: "🚀 Поделиться пророчеством",
+                shareText: "🔮 Оракул дал мне предсказание! Узнай свое будущее тут: ",
+                topics: {
+                    love: "Любовь", money: "Деньги", yesno: "Да / Нет", today: "Карта Дня", advice: "Совет", secret: "Тайное"
+                },
+                focusMsg: "Тема запроса: "
+            },
+            en: {
+                welcomeTitle: "🌌 HELLO, TRAVELER",
+                welcomeDesc: "I am the Ancient Oracle.<br>I know the answers you seek.<br>Are you ready to face the truth?",
+                btnStart: "ENTER PORTAL",
+                selectTitle: "🔮 CHOOSE A PATH",
+                focusTitle: "✨ CONNECTING...",
+                focusHint: "(Think of your question now)",
+                btnAsk: "REVEAL FATE",
+                resultTitle: "🌌 PROPHECY",
+                btnAgain: "🔄 Ask Another",
+                back: "← Back",
+                share: "🚀 Share Prophecy",
+                shareText: "🔮 The Oracle revealed my fate! Check yours here: ",
+                topics: {
+                    love: "Love", money: "Money", yesno: "Yes / No", today: "Card of Day", advice: "Advice", secret: "Secret"
+                },
+                focusMsg: "Topic: "
+            },
+            he: {
+                welcomeTitle: "🌌 שלום לנודד",
+                welcomeDesc: "אני האורקל העתיק.<br>אני יודע את התשובות לשאלותיך.<br>האם אתה מוכן לגלות את האמת?",
+                btnStart: "הכנס לפורטל",
+                selectTitle: "🔮 בחר נושא",
+                focusTitle: "✨ מתחבר...",
+                focusHint: "(חשוב על השאלה כעת)",
+                btnAsk: "גלה את העתיד",
+                resultTitle: "🌌 נבואה",
+                btnAgain: "🔄 שאל שוב",
+                back: "→ חזור",
+                share: "🚀 שתף את הנבואה",
+                shareText: "🔮 האורקל גילה לי את עתידי! בדוק את שלך כאן: ",
+                topics: {
+                    love: "אהבה", money: "כסף", yesno: "כן / לא", today: "קלף יומי", advice: "עצה", secret: "סוד"
+                },
+                focusMsg: "נושא השאלה: "
+            },
+            ar: {
+                welcomeTitle: "🌌 أهلاً أيها المسافر",
+                welcomeDesc: "أنا العراف القديم.<br>أعرف الإجابات التي تبحث عنها.<br>هل أنت مستعد لمعرفة الحقيقة؟",
+                btnStart: "ادخل البوابة",
+                selectTitle: "🔮 اختر مسارك",
+                focusTitle: "✨ جاري الاتصال...",
+                focusHint: "(فكر في سؤالك الآن)",
+                btnAsk: "اكشف المصير",
+                resultTitle: "🌌 النبوءة",
+                btnAgain: "🔄 اسأل مرة أخرى",
+                back: "→ رجوع",
+                share: "🚀 شارك النبوءة",
+                shareText: "🔮 كشف العراف عن قدري! تحقق من قدرك هنا: ",
+                topics: {
+                    love: "حب", money: "مال", yesno: "نعم / لا", today: "بطاقة اليوم", advice: "نصيحة", secret: "سر"
+                },
+                focusMsg: "موضوع السؤال: "
+            }
+        };
+
+        // === МАГИЯ ЗВЕЗД ===
+        function createStars() {
+            const container = document.getElementById('stars-container');
+            for (let i = 0; i < 40; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const size = Math.random() * 3 + 1;
+                const duration = Math.random() * 3 + 2;
+                star.style.left = x + '%';
+                star.style.top = y + '%';
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.animationDuration = duration + 's';
+                container.appendChild(star);
+            }
+        }
+        createStars();
+
+        // === УПРАВЛЕНИЕ ИНТЕРФЕЙСОМ ===
+        window.setLanguage = function(lang) {
+            currentLang = lang;
+            
+            // UI кнопки
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+
+            // RTL
+            if (lang === 'he' || lang === 'ar') document.body.classList.add('rtl');
+            else document.body.classList.remove('rtl');
+
+            // Обновляем тексты
+            const t = dictionary[lang];
+            document.getElementById('txt-welcome-title').innerText = t.welcomeTitle;
+            document.getElementById('txt-welcome-desc').innerHTML = t.welcomeDesc;
+            document.getElementById('txt-btn-start').innerText = t.btnStart;
+            document.getElementById('txt-select-title').innerText = t.selectTitle;
+            document.getElementById('txt-focus-title').innerText = t.focusTitle;
+            document.getElementById('txt-focus-hint').innerText = t.focusHint;
+            document.getElementById('txt-btn-ask').innerText = t.btnAsk;
+            document.getElementById('txt-result-title').innerText = t.resultTitle;
+            document.getElementById('txt-btn-again').innerText = t.btnAgain;
+            document.getElementById('txt-back').innerText = t.back;
+            document.getElementById('txt-share').innerText = t.share;
+
+            document.getElementById('btn-love').innerText = t.topics.love;
+            document.getElementById('btn-money').innerText = t.topics.money;
+            document.getElementById('btn-yesno').innerText = t.topics.yesno;
+            document.getElementById('btn-today').innerText = t.topics.today;
+            document.getElementById('btn-advice').innerText = t.topics.advice;
+            document.getElementById('btn-secret').innerText = t.topics.secret;
+        }
+
+        window.showScreen = function(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        window.selectTopic = function(key) {
+            currentTopicKey = key;
+            const t = dictionary[currentLang];
+            document.getElementById('focus-msg').innerText = t.focusMsg + t.topics[key];
+            showScreen('screen-focus');
+        }
+
+        window.goBack = function() {
+            showScreen('screen-select');
+            document.getElementById('result-text').innerHTML = "";
+            document.getElementById('loader').style.display = "none";
+        }
+
+        window.shareApp = function() {
+            const t = dictionary[currentLang];
+            // Вставь сюда ссылку на своего бота
+            const botUrl = "https://t.me/YOUR_BOT_NAME"; 
+            const text = t.shareText;
+            const tgLink = `https://t.me/share/url?url=${encodeURIComponent(botUrl)}&text=${encodeURIComponent(text)}`;
+            window.open(tgLink, '_blank');
+        }
+
+        // === ОБРАЩЕНИЕ К СЕРВЕРУ (BACKEND) ===
+        window.askOracle = async function() {
+            showScreen('screen-result');
+            const resultBox = document.getElementById('result-text');
+            const loader = document.getElementById('loader');
+            
+            resultBox.innerHTML = "";
+            loader.style.display = "block";
+
+            // Определяем параметры для AI
+            let langName = "Russian";
+            if(currentLang === 'en') langName = "English";
+            if(currentLang === 'he') langName = "Hebrew";
+            if(currentLang === 'ar') langName = "Arabic";
+
+            const t = dictionary[currentLang];
+            const topicName = t.topics[currentTopicKey];
+            
+            // Формируем промпт для отправки на сервер
+            const promptData = `
+                You are a mystical Oracle. 
+                User Language: ${langName}.
+                Topic: ${topicName}.
+                Task: Give a short, mystical prediction/advice. 
+                Format using HTML tags: use <br> for new lines, <b> for emphasis.
+                Use emojis at the start of sentences.
+                Structure: 1. Mystical intro. 2. Direct answer. 3. Short advice.
+                If topic is "Yes / No", start with bold YES or NO in ${langName}.
+                Output must be fully in ${langName}.
+            `;
+
+            try {
+                // ОТПРАВЛЯЕМ ЗАПРОС НА НАШ СЕРВЕР (api/oracle.js)
+                const response = await fetch('/api/oracle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptData })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Server error');
+                }
+
+                // Очистка от маркдауна (если вдруг придет)
+                let cleanText = data.text.replace(/```html/g, "").replace(/```/g, "");
+
+                loader.style.display = "none";
+                resultBox.innerHTML = cleanText;
+
+            } catch (error) {
+                loader.style.display = "none";
+                console.error(error);
+                resultBox.innerText = (currentLang === 'ru') 
+                    ? "Связь с космосом прервана... Попробуйте позже." 
+                    : "Connection lost... Try again later.";
+            }
+        }
+    </script>
+</body>
+</html>
