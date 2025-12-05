@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>✨ Mystical Oracle ✨</title>
@@ -535,6 +536,38 @@
                 resultBox.innerHTML = '<b>⚠️ Connection lost...</b><br>Try again later';
             }
         }
-    </script>
+   
+
+
+    // Инициализация при загрузке
+if (window.Telegram && Telegram.WebApp) {
+  Telegram.WebApp.ready();
+  Telegram.WebApp.expand(); // Расширяет на весь экран в Telegram
+
+  // Получаем данные пользователя для персонализации
+  const user = Telegram.WebApp.initDataUnsafe.user;
+  if (user) {
+    // Например, приветствие с именем
+    const greeting = document.querySelector('h1') || document.createElement('h1');
+    greeting.textContent = `HELLO, ${user.first_name || user.username || 'TRAVELER'}`;
+    document.body.insertBefore(greeting, document.body.firstChild);
+  }
+
+  // Адаптация под тёмную тему Telegram
+  if (Telegram.WebApp.colorScheme === 'dark') {
+    document.body.classList.add('dark-theme'); // Добавь CSS-класс для тёмной темы
+  }
+
+  // Главная кнопка внизу (для "REVEAL FATE" или "ASK ANOTHER")
+  const mainButton = Telegram.WebApp.MainButton;
+  mainButton.setText('REVEAL FATE');
+  mainButton.show();
+  mainButton.onClick(() => {
+    // Твоя логика генерации пророчества
+    generateProphecy(); // Функция из твоего кода
+    // Или просто сабмит формы, если есть
+  });
+}
+     </script>
 </body>
 </html>
